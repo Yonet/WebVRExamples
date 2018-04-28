@@ -2,6 +2,7 @@
   "name": "WebVRExamples",
   "version": "1.0.0",
   "description": "WebVR Example repo",
+  "homepage": "https://stackblitz.com/edit/3d-cube",
   "main": "index.js",
   "author": "Aysegul Yonet <aysegul@nrwl.io>",
   "license": "MIT",
@@ -10,5 +11,8 @@
   },
   "devDependencies": {
     "http-server": "^0.11.1"
+  },
+  "dependencies": {
+    "three": "^0.92.0"
   }
 }

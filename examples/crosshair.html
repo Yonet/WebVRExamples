@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>WebVR Examples</title>
+</head>
+<body>
+
+<div id="viewer"></div>
+<script src="../third_party/three.js/js/three.min.js"></script>
+<script src="../third_party/three.js/js/vr/WebVR.js"></script>
+<script>
+    var camera, scene, renderer, intersects;
+    var geometry, material, mesh;
+    var cubes;
+    var container = document.getElementById("viewer");
+
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+
+    init();
+    addCubeGroup();
+    animate();
+
+    function init() {
+        camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
+        camera.position.z = 1;
+        crosshair = new THREE.Mesh(
+            new THREE.RingGeometry( 0.02, 0.04, 32 ),
+            new THREE.MeshBasicMaterial( {
+                color: 0xffffff,
+                opacity: 0.5,
+                transparent: true
+            } )
+        );
+        crosshair.position.z = - 2;
+        camera.add( crosshair );
+        // addCrossHair();
+
+        scene = new THREE.Scene();
+
+        geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        material = new THREE.MeshNormalMaterial();
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.vr.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        renderer.domElement.addEventListener( 'mousedown', onMouseDown, false );
+        renderer.domElement.addEventListener( 'mouseup', onMouseUp, false );
+        renderer.domElement.addEventListener( 'touchstart', onMouseDown, false );
+        renderer.domElement.addEventListener( 'touchend', onMouseUp, false );
+
+        document.body.appendChild( WEBVR.createButton( renderer ) );
+        scene.add(new THREE.HemisphereLight( 0x606060, 0x404040 ));
+    }
+
+    function addCubeGroup() {
+        cubes = new THREE.Object3D;
+        for (var i = 0; i < 10; i++) {
+            addBox();
+        }
+        scene.add(cubes)
+    }
+
+    function addBox() {
+        let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        let material = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
+
+        let cube = new THREE.Mesh(geometry, material);
+        cube.position.x = Math.random() * 4 - 2;
+        cube.position.y = Math.random() * 4 - 2;
+        cube.position.z = Math.random() * 4 - 2;
+
+        cubes.add(cube);
+
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // update the picking ray with the camera and mouse position
+        raycaster.setFromCamera( mouse, camera );
+
+        // calculate objects intersecting the picking ray
+        intersects = raycaster.intersectObjects( scene.children );
+
+        for ( var i = 0; i < intersects.length; i++ ) {
+            intersects[ i ].object.material.opacity = 0.5;
+            intersects[ i ].object.scale.x = +0.1;
+			console.log("intersects", intersects[i].object);
+        }
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+        // cubes.rotation.x += 0.01;
+        // cubes.rotation.y += 0.02;
+
+        renderer.render(scene, camera);
+
+    }
+
+    function addCrossHair() {
+        crosshair = new THREE.Mesh(
+            new THREE.RingGeometry( 0.02, 0.04, 32 ),
+            new THREE.MeshBasicMaterial( {
+                color: 0xffffff,
+                opacity: 0.5,
+                transparent: true
+            } )
+        );
+        crosshair.position.z = - 2;
+        camera.add( crosshair );
+	}
+
+    function onPointerRestricted() {
+        var pointerLockElement = renderer.domElement;
+        if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
+            pointerLockElement.requestPointerLock();
+            // console.log("pointerRestricted", pointerLockElement);
+
+
+        }
+    }
+
+    function onPointerUnrestricted() {
+        var currentPointerLockElement = document.pointerLockElement;
+        var expectedPointerLockElement = renderer.domElement;
+        if ( currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function' ) {
+            document.exitPointerLock();
+        }
+    }
+
+    function onMouseMove( event ) {
+
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    }
+
+    function onMouseDown() {
+        isMouseDown = true;
+    }
+    function onMouseUp() {
+        isMouseDown = false;
+    }
+
+    window.addEventListener( 'vrdisplaypointerrestricted', onPointerRestricted, false );
+    window.addEventListener( 'vrdisplaypointerunrestricted', onPointerUnrestricted, false );
+
+</script>
+</body>
+</html>

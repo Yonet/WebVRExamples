@@ -92,7 +92,7 @@
         crosshair = new THREE.Mesh(
             new THREE.RingGeometry( 0.02, 0.04, 32 ),
             new THREE.MeshBasicMaterial( {
-                color: 0xffffff,
+                color: 0x8afe0b,
                 opacity: 0.5,
                 transparent: true
             } )
@@ -138,7 +138,7 @@
             if((i % 13 ) === 0) {
 
                 birds.push(object);
-                console.log('Added audio to ', object);
+                // console.log('Added audio to ', object);
 			}
 
             room.add( object );
@@ -166,7 +166,7 @@
 
         document.body.appendChild( WEBVR.createButton( renderer ) );
         birds.forEach(addSound);
-		console.log('Bird s ', birds);
+		// console.log('Bird s ', birds);
     }
     //Init
 
@@ -186,7 +186,7 @@
         var pointerLockElement = renderer.domElement;
         if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
             pointerLockElement.requestPointerLock();
-            console.log("pointerRestricted", pointerLockElement);
+            // console.log("pointerRestricted", pointerLockElement);
 
 
         }
@@ -273,7 +273,7 @@
                 }
 
                 INTERSECTED = intersects[ 0 ].object;
-                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                INTERSECTED.currentHex = INTERSECTED.material.opacity = 0.5;
                 INTERSECTED.material.emissive.setHex( 0xff0000 );
 
             }

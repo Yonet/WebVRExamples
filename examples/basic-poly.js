@@ -1,8 +1,5 @@
 // THREE.JS VIEWER
 // import * as THREE from 'three';
-import {config} from "../config";
-
-
 const WIDTH = viewer.offsetWidth;
 const HEIGHT = viewer.offsetHeight;
 

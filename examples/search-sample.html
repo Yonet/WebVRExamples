@@ -82,7 +82,7 @@ limitations under the License.
 	<body>
 
 		<form id="search">
-			<input id="query" value="poly"></input>
+			<input id="query" value="poly"/>
 			<button id="button">search</button>
 		</form>
 		<span id="results"></span>
@@ -91,7 +91,7 @@ limitations under the License.
 			<span id="asset_name">Title</span><br/>
 			by <span id="asset_author">Author</span>
 		</div>
-
+		<script src="../config.js"></script>
 		<script src="../third_party/three.js/js/three.min.js"></script>
 		<script src="../third_party/three.js/js/loaders/OBJLoader.js"></script>
 		<script src="../third_party/three.js/js/loaders/MTLLoader.js"></script>
@@ -147,7 +147,7 @@ limitations under the License.
 			const API_KEY = config.apiKey;
 
 			function searchPoly( keywords, onLoad ) {
-
+				console.log('API_KEY', API_KEY);
 				var url = `https://poly.googleapis.com/v1/assets?keywords=${keywords}&format=OBJ&key=${API_KEY}`;
 
 				var request = new XMLHttpRequest();

@@ -1,0 +1,23 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    font-family: sans-serif;
+    line-height: 24px;
+}
+#viewer {
+    width: 100%;
+    height: calc(100% - 80px);
+}
+#info {
+    padding: 12px;
+    text-align: center;
+}
+#asset_name {
+    font-size: 22px;
+    font-weight: bold;
+}
+#asset_author {
+    color: #888;
+}

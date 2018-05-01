@@ -13,6 +13,7 @@
     "http-server": "^0.11.1"
   },
   "dependencies": {
+    "resonance-audio": "^1.0.0",
     "three": "^0.92.0"
   }
 }

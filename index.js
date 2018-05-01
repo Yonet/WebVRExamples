@@ -1,6 +1,5 @@
 // Import stylesheets
-import './style.css';
-import * as THREE from 'three';
+// import * as THREE from 'three';
 
 // Write Javascript code!
 

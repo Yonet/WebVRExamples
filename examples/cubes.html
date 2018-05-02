@@ -20,9 +20,17 @@
         a {
             color: #f00;
         }
+        .info{
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
+<div id="container"></div>
 <script src="../third_party/three.js/js/three.min.js"></script>
 <script src="../third_party/three.js/js/vr/WebVR.js"></script>
 <script src="../node_modules/resonance-audio/build/resonance-audio.min.js"></script>
@@ -36,33 +44,24 @@
 
     let room;
     let isMouseDown = false;
+    const info = document.createElement( 'div' );
 
     let INTERSECTED;
     let crosshair;
-    var selected = {};
-    var audioLoader = new THREE.AudioLoader();
-    var listener = new THREE.AudioListener();
-    birds = [];
-    var info = document.createElement( 'div' );
-
-    // let audioContext = new AudioContext();
-    // let resonanceAudioScene = new ResonanceAudio(audioContext);
+    let selected = {};
+    //Audio
+    let audioLoader = new THREE.AudioLoader();
+    let listener = new THREE.AudioListener();
+    let birds = [];
 
     init();
     animate();
 
     function init() {
+        container = document.getElementById( 'container' );
+        // document.body.appendChild( container );
 
-        container = document.createElement( 'div' );
-        document.body.appendChild( container );
-
-
-        info.style.position = 'absolute';
-        info.style.top = '10px';
-        info.style.width = '100%';
-        info.style.textAlign = 'center';
-        info.innerHTML = '<p>Find all the birds to win</p>';
-        // info.innerHTML = '<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - interactive cubes';
+        info.innerHTML = '<p class="info">Find all the birds to win</p>';
         container.appendChild( info );
 
         scene = new THREE.Scene();
@@ -80,9 +79,9 @@
             sound.play();
         });
 
-        var sphere = new THREE.SphereGeometry( 20, 32, 16 );
-        var material = new THREE.MeshPhongMaterial( { color: 0xff2200 } );
-        var mesh = new THREE.Mesh( sphere, material );
+        const sphere = new THREE.SphereGeometry( 20, 32, 16 );
+        const material = new THREE.MeshPhongMaterial( { color: 0xff2200 } );
+        const mesh = new THREE.Mesh( sphere, material );
         scene.add( mesh );
 
 // finally add the sound to the mesh
@@ -209,13 +208,9 @@
 
     }
 
-    //
-
     function animate() {
-
         renderer.animate( render );
-
-    }
+    };
 
     function render() {
 
@@ -238,53 +233,8 @@
         }
 
         // find intersections
+        handleSelection();
 
-        raycaster.setFromCamera( { x: 0, y: 0 }, camera );
-
-        var intersects = raycaster.intersectObjects( room.children );
-
-        if ( intersects.length > 0 ) {
-            const obj = intersects[ 0 ].object;
-			if(!selected.hasOwnProperty(obj.uuid)){
-			    console.log('Selected for the first time', obj.children[0]);
-
-				// audio.play();
-			    selected[obj.uuid] = obj;
-				birds = birds.filter((bird, i, arr) => {
-			        const eq = bird.uuid === obj.uuid;
-			        console.log('Equal ', eq);
-			        if(eq) { info.innerHTML = '<p>You have found a bird' + arr.length -1 + ' birds left</p>'}
-			        return !eq;
-                });
-
-			    console.log(selected, birds);
-			    const birdInd = getRandomInt(birds.length);
-			    const bird = birds[birdInd];
-                bird.add(sound);
-			    const audio = bird.children[0];
-			    audio.play();
-			}
-
-            if ( INTERSECTED != intersects[ 0 ].object ) {
-
-                if ( INTERSECTED ) {
-
-                    INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-                }
-
-                INTERSECTED = intersects[ 0 ].object;
-                INTERSECTED.currentHex = INTERSECTED.material.opacity = 0.5;
-                INTERSECTED.material.emissive.setHex( 0xff0000 );
-
-            }
-
-        } else {
-
-            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-            INTERSECTED = undefined;
-
-        }
 
         // Keep cubes inside room
 
@@ -320,15 +270,74 @@
             cube.rotation.x += cube.userData.velocity.x * 2 * delta;
             cube.rotation.y += cube.userData.velocity.y * 2 * delta;
             cube.rotation.z += cube.userData.velocity.z * 2 * delta;
-
         }
 
         renderer.render( scene, camera );
+    };
 
-    }
+    function handleSelection(){
 
-    function getRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
+        raycaster.setFromCamera( { x: 0, y: 0 }, camera );
+
+        var intersects = raycaster.intersectObjects( room.children );
+
+        if ( intersects.length > 0 ) {
+            const obj = intersects[ 0 ].object;
+            if(!selected.hasOwnProperty(obj.uuid)){
+                console.log('Selected for the first time', obj.children[0]);
+
+                // audio.play();
+                selected[obj.uuid] = obj;
+                birds = birds.filter((bird) => {
+                    const eq = bird.uuid === obj.uuid;
+                    if(eq) {
+                        info.innerHTML = '<p>You have found a bird' + parseInt(birds.length -1) + ' birds left</p>';
+                        audioLoader.load( '../assets/applause.wav', function( buffer ) {
+                            sound.setBuffer( buffer );
+                            sound.play();
+                        });
+                    }
+
+                    return !eq;
+                });
+
+                if(birds.length === 0) {
+                    info.innerHTML = '<p>You have found all the birds</p>';
+                    audioLoader.load( '../assets/applause.wav', function( buffer ) {
+                        sound.setBuffer( buffer );
+                        sound.play();
+                    });
+                    renderer.animate(null);
+                };
+
+                console.log(selected, birds);
+                const birdInd = getRandomInt(birds.length);
+                const bird = birds[birdInd];
+                bird.add(sound);
+                const audio = bird.children[0];
+                audio.play();
+            }
+
+            if ( INTERSECTED != intersects[ 0 ].object ) {
+
+                if ( INTERSECTED ) {
+
+                    INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                }
+
+                INTERSECTED = intersects[ 0 ].object;
+                INTERSECTED.currentHex = INTERSECTED.material.opacity = 0.5;
+                INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+            }
+
+        } else {
+
+            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+            INTERSECTED = undefined;
+
+        }
     }
 
     function addSound(bird, i, arr) {
@@ -340,7 +349,11 @@
         });
 		bird.add(sound);
 		console.log('bird ', bird);
-    }
+    };
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    };
 
 </script>
 </body>

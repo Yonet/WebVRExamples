@@ -26,11 +26,10 @@ to serve a local directory for testing:
     cd /examples/
     python -m SimpleHTTPServer 8000
 
-Or you can yarn/npm install and run:
+Or you can npm install and run:
 
 ```bash
-yarn start
-//or
+npm install
 npm run start
 ```
 These are the available samples:

@@ -17,128 +17,136 @@ limitations under the License.
 
 -->
 <html lang="en">
-	<head>
-		<title></title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			html {
-				height: 100%;
-			}
-			body {
-				height: 100%;
-				font-family: sans-serif;
-				line-height: 24px;
-			}
-			#viewer {
-				width: 100%;
-				height: calc(100% - 80px);
-			}
-			#info {
-				padding: 12px;
-				text-align: center;
-			}
-			#asset_name {
-				font-size: 22px;
-				font-weight: bold;
-			}
-			#asset_author {
-				color: #888;
-			}
-		</style>
-	</head>
-	<body>
 
-		<div id="viewer"></div>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		html {
+			height: 100%;
+		}
 
-		<div id="info">
-			<span id="asset_name">Title</span><br/>
-			by <span id="asset_author">Author</span>
-		</div>
+		body {
+			height: 100%;
+			font-family: sans-serif;
+			line-height: 24px;
+		}
 
-		<script src="../third_party/three.js/js/three.min.js"></script>
-		<script src="../third_party/three.js/js/LegacyGLTFLoader.js"></script>
-		<script>
+		#viewer {
+			width: 100%;
+			height: calc(100% - 80px);
+		}
 
-			// THREE.JS VIEWER
+		#info {
+			padding: 12px;
+			text-align: center;
+		}
 
-			const WIDTH = viewer.offsetWidth;
-			const HEIGHT = viewer.offsetHeight;
+		#asset_name {
+			font-size: 22px;
+			font-weight: bold;
+		}
 
-			var camera = new THREE.PerspectiveCamera( 60, WIDTH / HEIGHT, 0.01, 100 );
-			camera.position.set( 5, 3, 5 );
-			camera.lookAt( 0, 1.5, 0 );
+		#asset_author {
+			color: #888;
+		}
+	</style>
+</head>
 
-			var scene = new THREE.Scene();
-			scene.background = new THREE.Color( 0x222222 );
+<body>
 
-			scene.add( new THREE.GridHelper( 10, 10 ) );
+	<div id="viewer"></div>
 
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setPixelRatio( window.devicePixelRatio );
-			renderer.setSize( WIDTH, HEIGHT );
-			viewer.appendChild( renderer.domElement );
+	<div id="info">
+		<span id="asset_name">Title</span><br />
+		by <span id="asset_author">Author</span>
+	</div>
 
-			function animate() {
+	<script src="../third_party/three.js/js/three.min.js"></script>
+	<script src="../third_party/three.js/js/LegacyGLTFLoader.js"></script>
+	<script>
 
-				var time = performance.now() / 5000;
+		// THREE.JS VIEWER
 
-				camera.position.x = Math.sin( time ) * 5;
-				camera.position.z = Math.cos( time ) * 5;
-				camera.lookAt( 0, 1.5, 0 );
+		const WIDTH = viewer.offsetWidth;
+		const HEIGHT = viewer.offsetHeight;
 
-				renderer.render( scene, camera );
-				requestAnimationFrame( animate );
+		var camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 0.01, 100);
+		camera.position.set(5, 3, 5);
+		camera.lookAt(0, 1.5, 0);
 
-			}
+		var scene = new THREE.Scene();
+		scene.background = new THREE.Color(0x222222);
 
-			requestAnimationFrame( animate );
+		scene.add(new THREE.GridHelper(10, 10));
 
-			// POLY REST API
+		var renderer = new THREE.WebGLRenderer();
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.setSize(WIDTH, HEIGHT);
+		viewer.appendChild(renderer.domElement);
 
-			const API_KEY = 'AIzaSyAVDv1aXBSEntY7jtzsPQ47rBZtVgXrbRI';
+		function animate() {
 
-			function loadAsset( id ) {
+			var time = performance.now() / 5000;
 
-				var url = `https://poly.googleapis.com/v1/assets/${id}/?key=${API_KEY}`;
+			camera.position.x = Math.sin(time) * 5;
+			camera.position.z = Math.cos(time) * 5;
+			camera.lookAt(0, 1.5, 0);
 
-				var request = new XMLHttpRequest();
-				request.open( 'GET', url, true );
-				request.addEventListener( 'load', function ( event ) {
+			renderer.render(scene, camera);
+			requestAnimationFrame(animate);
 
-					var asset = JSON.parse( event.target.response );
+		}
 
-					asset_name.textContent = asset.displayName;
-					asset_author.textContent = asset.authorName;
+		requestAnimationFrame(animate);
 
-					var format = asset.formats.find( format => { return format.formatType === 'GLTF'; } );
+		// POLY REST API
 
-					if ( format !== undefined ) {
+		const API_KEY = 'AIzaSyAVDv1aXBSEntY7jtzsPQ47rBZtVgXrbRI';
 
-						var url = format.root.url;
+		function loadAsset(id) {
 
-						var loader = new THREE.LegacyGLTFLoader();
-						loader.load( url, function ( response ) {
+			var url = `https://poly.googleapis.com/v1/assets/${id}/?key=${API_KEY}`;
 
-							scene.add( response.scene );
+			var request = new XMLHttpRequest();
+			request.open('GET', url, true);
+			request.addEventListener('load', function (event) {
 
-						} );
+				var asset = JSON.parse(event.target.response);
 
-					}
+				asset_name.textContent = asset.displayName;
+				asset_author.textContent = asset.authorName;
 
-				} );
-				request.send( null );
+				var format = asset.formats.find(format => { return format.formatType === 'GLTF'; });
 
-			}
+				if (format !== undefined) {
 
-			if ( API_KEY.startsWith( '**' ) ) {
+					var url = format.root.url;
 
-				alert( 'Sample incorrectly set up. Please enter your API Key for the Poly API in the API_KEY variable.' );
+					var loader = new THREE.LegacyGLTFLoader();
+					loader.load(url, function (response) {
 
-			}
+						scene.add(response.scene);
 
-			loadAsset( 'dBL4e9Ik5NA' );
+					});
 
-		</script>
-	</body>
+				}
+
+			});
+			request.send(null);
+
+		}
+
+		if (API_KEY.startsWith('**')) {
+
+			alert('Sample incorrectly set up. Please enter your API Key for the Poly API in the API_KEY variable.');
+
+		}
+
+		loadAsset('dBL4e9Ik5NA');
+
+	</script>
+</body>
+
 </html>

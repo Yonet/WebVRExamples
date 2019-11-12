@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Cubes</title>
@@ -7,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <!-- Origin Trial Token, feature = WebVR (For Chrome M62+), origin = https://threejs.org, expires = 2018-05-12 -->
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="2018-05-12"
-          content="AkM+gi6Fb7IUBwFLs18hn/x6dusbsVRYG9KBTWUUjvmT0m0wGkxRPy63Aj/i+Ti4d6qMEMnRcsR7MVV5Wuvp/AIAAABQeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJWUjEuMU02MiIsImV4cGlyeSI6MTUyNjExODIwMH0=">
+        content="AkM+gi6Fb7IUBwFLs18hn/x6dusbsVRYG9KBTWUUjvmT0m0wGkxRPy63Aj/i+Ti4d6qMEMnRcsR7MVV5Wuvp/AIAAABQeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJWUjEuMU02MiIsImV4cGlyeSI6MTUyNjExODIwMH0=">
     <style>
         body {
             font-family: Monospace;
@@ -20,341 +21,343 @@
         a {
             color: #f00;
         }
-        .info{
+
+        .info {
             position: absolute;
             top: 10px;
             width: 100%;
             text-align: center;
         }
-
     </style>
 </head>
+
 <body>
-<div id="container"></div>
-<script src="../third_party/three.js/js/three.min.js"></script>
-<script src="../third_party/three.js/js/vr/WebVR.js"></script>
-<script src="../node_modules/resonance-audio/build/resonance-audio.min.js"></script>
-<!--<script src="../third_party/three.js/js/loaders/MTLLoader.js"></script>-->
-<script>
+    <div id="container"></div>
+    <script src="../third_party/three.js/js/three.min.js"></script>
+    <script src="../third_party/three.js/js/vr/WebVR.js"></script>
+    <script src="../node_modules/resonance-audio/build/resonance-audio.min.js"></script>
+    <!--<script src="../third_party/three.js/js/loaders/MTLLoader.js"></script>-->
+    <script>
 
-    const clock = new THREE.Clock();
+        const clock = new THREE.Clock();
 
-    let container;
-    let camera, scene, raycaster, renderer;
+        let container;
+        let camera, scene, raycaster, renderer;
 
-    let room;
-    let isMouseDown = false;
-    const info = document.createElement( 'div' );
+        let room;
+        let isMouseDown = false;
+        const info = document.createElement('div');
 
-    let INTERSECTED;
-    let crosshair;
-    let selected = {};
-    //Audio
-    let audioLoader = new THREE.AudioLoader();
-    let listener = new THREE.AudioListener();
-    let birds = [];
-
-    init();
-    animate();
-
-    function init() {
-        container = document.getElementById( 'container' );
-        // document.body.appendChild( container );
-
-        info.innerHTML = '<p class="info">Find all the birds to win</p>';
-        container.appendChild( info );
-
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0x4286f4 );
-
-        camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
-        camera.add(listener);
-        scene.add( camera );
-
+        let INTERSECTED;
+        let crosshair;
+        let selected = {};
         //Audio
-		sound = new THREE.PositionalAudio( listener );
+        let audioLoader = new THREE.AudioLoader();
+        let listener = new THREE.AudioListener();
+        let birds = [];
 
-        audioLoader.load( '../assets/bird-1.wav', function( buffer ) {
-            sound.setBuffer( buffer );
-            sound.play();
-        });
+        init();
+        animate();
 
-        const sphere = new THREE.SphereGeometry( 20, 32, 16 );
-        const material = new THREE.MeshPhongMaterial( { color: 0xff2200 } );
-        const mesh = new THREE.Mesh( sphere, material );
-        scene.add( mesh );
+        function init() {
+            container = document.getElementById('container');
+            // document.body.appendChild( container );
 
-// finally add the sound to the mesh
-//         mesh.add( sound );
+            info.innerHTML = '<p class="info">Find all the birds to win</p>';
+            container.appendChild(info);
 
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x4286f4);
 
-        crosshair = new THREE.Mesh(
-            new THREE.RingGeometry( 0.02, 0.04, 32 ),
-            new THREE.MeshBasicMaterial( {
-                color: 0x8afe0b,
-                opacity: 0.5,
-                transparent: true
-            } )
-        );
-        crosshair.position.z = - 2;
-        camera.add( crosshair );
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.add(listener);
+            scene.add(camera);
 
-        room = new THREE.Mesh(
-            new THREE.BoxGeometry( 6, 6, 6, 8, 8, 8 ),
-            new THREE.MeshBasicMaterial( { color: 0x404040, wireframe: false } )
-        );
-        room.position.y = 3;
-        scene.add( room );
+            //Audio
+            sound = new THREE.PositionalAudio(listener);
 
-        scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+            audioLoader.load('../assets/bird-1.wav', function (buffer) {
+                sound.setBuffer(buffer);
+                sound.play();
+            });
 
-        var light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 1, 1, 1 ).normalize();
-        scene.add( light );
+            const sphere = new THREE.SphereGeometry(20, 32, 16);
+            const material = new THREE.MeshPhongMaterial({ color: 0xff2200 });
+            const mesh = new THREE.Mesh(sphere, material);
+            scene.add(mesh);
 
-        var geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
+            // finally add the sound to the mesh
+            //         mesh.add( sound );
 
-        for ( var i = 0; i < 50; i ++ ) {
 
-            var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+            crosshair = new THREE.Mesh(
+                new THREE.RingGeometry(0.02, 0.04, 32),
+                new THREE.MeshBasicMaterial({
+                    color: 0x8afe0b,
+                    opacity: 0.5,
+                    transparent: true
+                })
+            );
+            crosshair.position.z = - 2;
+            camera.add(crosshair);
 
-            object.position.x = Math.random() * 4 - 2;
-            object.position.y = Math.random() * 4 - 2;
-            object.position.z = Math.random() * 4 - 2;
+            room = new THREE.Mesh(
+                new THREE.BoxGeometry(6, 6, 6, 8, 8, 8),
+                new THREE.MeshBasicMaterial({ color: 0x404040, wireframe: false })
+            );
+            room.position.y = 3;
+            scene.add(room);
 
-            object.rotation.x = Math.random() * 2 * Math.PI;
-            object.rotation.y = Math.random() * 2 * Math.PI;
-            object.rotation.z = Math.random() * 2 * Math.PI;
+            scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
 
-            object.scale.x = Math.random() + 0.5;
-            object.scale.y = Math.random() + 0.5;
-            object.scale.z = Math.random() + 0.5;
+            var light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(1, 1, 1).normalize();
+            scene.add(light);
 
-            object.userData.velocity = new THREE.Vector3();
-            object.userData.velocity.x = Math.random() * 0.01 - 0.005;
-            object.userData.velocity.y = Math.random() * 0.01 - 0.005;
-            object.userData.velocity.z = Math.random() * 0.01 - 0.005;
-            if((i % 13 ) === 0) {
+            var geometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
 
-                birds.push(object);
-                // console.log('Added audio to ', object);
-			}
+            for (var i = 0; i < 50; i++) {
 
-            room.add( object );
+                var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
 
-        }
-        raycaster = new THREE.Raycaster();
+                object.position.x = Math.random() * 4 - 2;
+                object.position.y = Math.random() * 4 - 2;
+                object.position.z = Math.random() * 4 - 2;
 
-        renderer = new THREE.WebGLRenderer( { antialias: true } );
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.vr.enabled = true;
-        container.appendChild( renderer.domElement );
+                object.rotation.x = Math.random() * 2 * Math.PI;
+                object.rotation.y = Math.random() * 2 * Math.PI;
+                object.rotation.z = Math.random() * 2 * Math.PI;
 
-        renderer.domElement.addEventListener( 'mousedown', onMouseDown, false );
-        renderer.domElement.addEventListener( 'mouseup', onMouseUp, false );
-        renderer.domElement.addEventListener( 'touchstart', onMouseDown, false );
-        renderer.domElement.addEventListener( 'touchend', onMouseUp, false );
+                object.scale.x = Math.random() + 0.5;
+                object.scale.y = Math.random() + 0.5;
+                object.scale.z = Math.random() + 0.5;
 
-        window.addEventListener( 'resize', onWindowResize, false );
+                object.userData.velocity = new THREE.Vector3();
+                object.userData.velocity.x = Math.random() * 0.01 - 0.005;
+                object.userData.velocity.y = Math.random() * 0.01 - 0.005;
+                object.userData.velocity.z = Math.random() * 0.01 - 0.005;
+                if ((i % 13) === 0) {
 
-        //
-
-        window.addEventListener( 'vrdisplaypointerrestricted', onPointerRestricted, false );
-        window.addEventListener( 'vrdisplaypointerunrestricted', onPointerUnrestricted, false );
-
-        document.body.appendChild( WEBVR.createButton( renderer ) );
-        birds.forEach(addSound);
-		// console.log('Bird s ', birds);
-    }
-    //Init
-
-    function onMouseDown() {
-
-        isMouseDown = true;
-
-    }
-
-    function onMouseUp() {
-
-        isMouseDown = false;
-
-    }
-
-    function onPointerRestricted() {
-        var pointerLockElement = renderer.domElement;
-        if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
-            pointerLockElement.requestPointerLock();
-            // console.log("pointerRestricted", pointerLockElement);
-
-
-        }
-    }
-
-    function onPointerUnrestricted() {
-        var currentPointerLockElement = document.pointerLockElement;
-        var expectedPointerLockElement = renderer.domElement;
-        if ( currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function' ) {
-            document.exitPointerLock();
-        }
-    }
-
-    function onWindowResize() {
-
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        renderer.setSize( window.innerWidth, window.innerHeight );
-
-    }
-
-    function animate() {
-        renderer.animate( render );
-    };
-
-    function render() {
-
-        var delta = clock.getDelta() * 60;
-
-        if ( isMouseDown === true ) {
-			// console.log('room ', room.children[0]);
-            const cube = room.children[ 0 ];
-            room.remove( cube );
-            // console.log(cube);
-			cube.scale.x = 5;
-            cube.position.set( 0, 0, - 0.75 );
-            cube.position.applyQuaternion( camera.quaternion );
-            cube.userData.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta;
-            cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta;
-            cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta;
-            cube.userData.velocity.applyQuaternion( camera.quaternion );
-            room.add( cube );
-
-        }
-
-        // find intersections
-        handleSelection();
-
-
-        // Keep cubes inside room
-
-        for ( var i = 0; i < room.children.length; i ++ ) {
-
-            var cube = room.children[ i ];
-
-            cube.userData.velocity.multiplyScalar( 1 - ( 0.001 * delta ) );
-
-            cube.position.add( cube.userData.velocity );
-
-            if ( cube.position.x < - 3 || cube.position.x > 3 ) {
-
-                cube.position.x = THREE.Math.clamp( cube.position.x, - 3, 3 );
-                cube.userData.velocity.x = - cube.userData.velocity.x;
-
-            }
-
-            if ( cube.position.y < - 3 || cube.position.y > 3 ) {
-
-                cube.position.y = THREE.Math.clamp( cube.position.y, - 3, 3 );
-                cube.userData.velocity.y = - cube.userData.velocity.y;
-
-            }
-
-            if ( cube.position.z < - 3 || cube.position.z > 3 ) {
-
-                cube.position.z = THREE.Math.clamp( cube.position.z, - 3, 3 );
-                cube.userData.velocity.z = - cube.userData.velocity.z;
-
-            }
-
-            cube.rotation.x += cube.userData.velocity.x * 2 * delta;
-            cube.rotation.y += cube.userData.velocity.y * 2 * delta;
-            cube.rotation.z += cube.userData.velocity.z * 2 * delta;
-        }
-
-        renderer.render( scene, camera );
-    };
-
-    function handleSelection(){
-
-        raycaster.setFromCamera( { x: 0, y: 0 }, camera );
-
-        var intersects = raycaster.intersectObjects( room.children );
-
-        if ( intersects.length > 0 ) {
-            const obj = intersects[ 0 ].object;
-            if(!selected.hasOwnProperty(obj.uuid)){
-                console.log('Selected for the first time', obj.children[0]);
-
-                // audio.play();
-                selected[obj.uuid] = obj;
-                birds = birds.filter((bird) => {
-                    const eq = bird.uuid === obj.uuid;
-                    if(eq) {
-                        info.innerHTML = '<p>You have found a bird' + parseInt(birds.length -1) + ' birds left</p>';
-                        audioLoader.load( '../assets/applause.wav', function( buffer ) {
-                            sound.setBuffer( buffer );
-                            sound.play();
-                        });
-                    }
-
-                    return !eq;
-                });
-
-                if(birds.length === 0) {
-                    info.innerHTML = '<p>You have found all the birds</p>';
-                    audioLoader.load( '../assets/applause.wav', function( buffer ) {
-                        sound.setBuffer( buffer );
-                        sound.play();
-                    });
-                    renderer.animate(null);
-                };
-
-                console.log(selected, birds);
-                const birdInd = getRandomInt(birds.length);
-                const bird = birds[birdInd];
-                bird.add(sound);
-                const audio = bird.children[0];
-                audio.play();
-            }
-
-            if ( INTERSECTED != intersects[ 0 ].object ) {
-
-                if ( INTERSECTED ) {
-
-                    INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                    birds.push(object);
+                    // console.log('Added audio to ', object);
                 }
 
-                INTERSECTED = intersects[ 0 ].object;
-                INTERSECTED.currentHex = INTERSECTED.material.opacity = 0.5;
-                INTERSECTED.material.emissive.setHex( 0xff0000 );
+                room.add(object);
+
+            }
+            raycaster = new THREE.Raycaster();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.vr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            renderer.domElement.addEventListener('mousedown', onMouseDown, false);
+            renderer.domElement.addEventListener('mouseup', onMouseUp, false);
+            renderer.domElement.addEventListener('touchstart', onMouseDown, false);
+            renderer.domElement.addEventListener('touchend', onMouseUp, false);
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            //
+
+            window.addEventListener('vrdisplaypointerrestricted', onPointerRestricted, false);
+            window.addEventListener('vrdisplaypointerunrestricted', onPointerUnrestricted, false);
+
+            document.body.appendChild(WEBVR.createButton(renderer));
+            birds.forEach(addSound);
+            // console.log('Bird s ', birds);
+        }
+        //Init
+
+        function onMouseDown() {
+
+            isMouseDown = true;
+
+        }
+
+        function onMouseUp() {
+
+            isMouseDown = false;
+
+        }
+
+        function onPointerRestricted() {
+            var pointerLockElement = renderer.domElement;
+            if (pointerLockElement && typeof (pointerLockElement.requestPointerLock) === 'function') {
+                pointerLockElement.requestPointerLock();
+                // console.log("pointerRestricted", pointerLockElement);
+
+
+            }
+        }
+
+        function onPointerUnrestricted() {
+            var currentPointerLockElement = document.pointerLockElement;
+            var expectedPointerLockElement = renderer.domElement;
+            if (currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof (document.exitPointerLock) === 'function') {
+                document.exitPointerLock();
+            }
+        }
+
+        function onWindowResize() {
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+        }
+
+        function animate() {
+            renderer.animate(render);
+        };
+
+        function render() {
+
+            var delta = clock.getDelta() * 60;
+
+            if (isMouseDown === true) {
+                // console.log('room ', room.children[0]);
+                const cube = room.children[0];
+                room.remove(cube);
+                // console.log(cube);
+                cube.scale.x = 5;
+                cube.position.set(0, 0, - 0.75);
+                cube.position.applyQuaternion(camera.quaternion);
+                cube.userData.velocity.x = (Math.random() - 0.5) * 0.02 * delta;
+                cube.userData.velocity.y = (Math.random() - 0.5) * 0.02 * delta;
+                cube.userData.velocity.z = (Math.random() * 0.01 - 0.05) * delta;
+                cube.userData.velocity.applyQuaternion(camera.quaternion);
+                room.add(cube);
 
             }
 
-        } else {
+            // find intersections
+            handleSelection();
 
-            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-            INTERSECTED = undefined;
+            // Keep cubes inside room
 
+            for (var i = 0; i < room.children.length; i++) {
+
+                var cube = room.children[i];
+
+                cube.userData.velocity.multiplyScalar(1 - (0.001 * delta));
+
+                cube.position.add(cube.userData.velocity);
+
+                if (cube.position.x < - 3 || cube.position.x > 3) {
+
+                    cube.position.x = THREE.Math.clamp(cube.position.x, - 3, 3);
+                    cube.userData.velocity.x = - cube.userData.velocity.x;
+
+                }
+
+                if (cube.position.y < - 3 || cube.position.y > 3) {
+
+                    cube.position.y = THREE.Math.clamp(cube.position.y, - 3, 3);
+                    cube.userData.velocity.y = - cube.userData.velocity.y;
+
+                }
+
+                if (cube.position.z < - 3 || cube.position.z > 3) {
+
+                    cube.position.z = THREE.Math.clamp(cube.position.z, - 3, 3);
+                    cube.userData.velocity.z = - cube.userData.velocity.z;
+
+                }
+
+                cube.rotation.x += cube.userData.velocity.x * 2 * delta;
+                cube.rotation.y += cube.userData.velocity.y * 2 * delta;
+                cube.rotation.z += cube.userData.velocity.z * 2 * delta;
+            }
+
+            renderer.render(scene, camera);
+        };
+
+        function handleSelection() {
+
+            raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+
+            var intersects = raycaster.intersectObjects(room.children);
+
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                if (!selected.hasOwnProperty(obj.uuid)) {
+                    console.log('Selected for the first time', obj.children[0]);
+
+                    // audio.play();
+                    selected[obj.uuid] = obj;
+                    birds = birds.filter((bird) => {
+                        const eq = bird.uuid === obj.uuid;
+                        if (eq) {
+                            info.innerHTML = '<p>You have found a bird' + parseInt(birds.length - 1) + ' birds left</p>';
+                            audioLoader.load('../assets/applause.wav', function (buffer) {
+                                sound.setBuffer(buffer);
+                                sound.play();
+                            });
+                        }
+
+                        return !eq;
+                    });
+
+                    if (birds.length === 0) {
+                        info.innerHTML = '<p>You have found all the birds</p>';
+                        audioLoader.load('../assets/applause.wav', function (buffer) {
+                            sound.setBuffer(buffer);
+                            sound.play();
+                        });
+                        renderer.animate(null);
+                    };
+
+                    console.log(selected, birds);
+                    const birdInd = getRandomInt(birds.length);
+                    const bird = birds[birdInd];
+                    bird.add(sound);
+                    const audio = bird.children[0];
+                    audio.play();
+                }
+
+                if (INTERSECTED != intersects[0].object) {
+
+                    if (INTERSECTED) {
+
+                        INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                    }
+
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.currentHex = INTERSECTED.material.opacity = 0.5;
+                    INTERSECTED.material.emissive.setHex(0xff0000);
+
+                }
+
+            } else {
+
+                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+                INTERSECTED = undefined;
+
+            }
         }
-    }
 
-    function addSound(bird, i, arr) {
-        const sound = new THREE.PositionalAudio( listener );
-		const url = '../assets/bird-' + (i + 1) + '.wav';
-		console.log('url ', url);
-        audioLoader.load( url, function( buffer ) {
-            sound.setBuffer( buffer );
-        });
-		bird.add(sound);
-		console.log('bird ', bird);
-    };
+        function addSound(bird, i, arr) {
+            const sound = new THREE.PositionalAudio(listener);
+            const url = '../assets/bird-' + (i + 1) + '.wav';
+            console.log('url ', url);
+            audioLoader.load(url, function (buffer) {
+                sound.setBuffer(buffer);
+            });
+            bird.add(sound);
+            console.log('bird ', bird);
+        };
 
-    function getRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
-    };
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        };
 
-</script>
+    </script>
 </body>
+
 </html>

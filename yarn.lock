@@ -133,9 +133,9 @@ resonance-audio@^1.0.0:
   dependencies:
     omnitone "^1.0.5"
 
-three@^0.92.0:
-  version "0.92.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.92.0.tgz#8d3d1f5af890e62da7f4cb45d20c09fa51057dcd"
+three@^0.125.0:
+  version "0.125.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.125.0.tgz#19e922b9dc51ad0b706893aeee888de68e99850a"
 
 union@~0.4.3:
   version "0.4.6"
